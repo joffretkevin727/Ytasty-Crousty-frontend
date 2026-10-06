@@ -18,6 +18,9 @@ import KitchenDashboard from "./pages/KitchenDashboard";
 import ProductList from "./pages/ProductList";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import OrderConfirmation from "./pages/OrderConfirmation";
+import OrderTracking from "./pages/OrderTracking";
 import ProtectedRoute from "./components/ProtectedRoute";
 import type { RootState } from "./store/store";
 
@@ -67,6 +70,10 @@ function App() {
         <Route path="/carte" element={<ProductList />} />
         <Route path="/produit/:id" element={<ProductDetail />} />
         <Route path="/panier" element={<Cart />} />
+        <Route path="/commande" element={<Checkout />} />
+        <Route path="/confirmation/:order_number" element={<OrderConfirmation />} />
+        <Route path="/suivi" element={<OrderTracking />} />
+        <Route path="/suivi/:order_number" element={<OrderTracking />} />
       </Route>
 
       <Route
