@@ -30,6 +30,10 @@ export interface RestaurantSummary {
   id: number;
   name: string;
   city: string;
+  address?: string;
+  is_open?: boolean;
+  opening_hours?: string;
+  contact?: string;
 }
 
 export interface ProductSummary {

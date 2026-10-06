@@ -1,17 +1,9 @@
-import { Routes, Route, Navigate, Outlet, Link } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import {
-  AppBar,
-  Badge,
-  Box,
-  Button,
-  IconButton,
-  Toolbar,
-  Tooltip,
-  Typography,
-} from "@mui/material";
-import ShoppingBagOutlined from "@mui/icons-material/ShoppingBagOutlined";
+import { Box } from "@mui/material";
 
+import Header from "./components/Header";
+import RestaurantList from "./components/RestaurantList";
 import Login from "./pages/Login";
 import { CreateUserPage } from "./pages/CreateUserPage";
 import KitchenDashboard from "./pages/KitchenDashboard";
@@ -24,49 +16,65 @@ import OrderTracking from "./pages/OrderTracking";
 import ProtectedRoute from "./components/ProtectedRoute";
 import type { RootState } from "./store/store";
 
+const cityByRestaurantId: Record<number, string> = {
+  1: "Aix-en-Provence",
+  2: "Lyon",
+  3: "Paris",
+  4: "Marseille",
+  5: "Toulouse",
+  6: "Bordeaux",
+  7: "Lille",
+  8: "Nice",
+  9: "Nantes",
+  10: "Montpellier",
+};
+
+const restaurantIdByCity: Record<string, number> = {
+  "Aix-en-Provence": 1,
+  Lyon: 2,
+  Paris: 3,
+  Marseille: 4,
+  Toulouse: 5,
+  Bordeaux: 6,
+  Lille: 7,
+  Nice: 8,
+  Nantes: 9,
+  Montpellier: 10,
+};
+
 function PublicLayout() {
   const cartCount = useSelector((state: RootState) =>
     state.cart.items.reduce((count, item) => count + item.quantity, 0)
   );
+  const location = useLocation();
+  const navigate = useNavigate();
+  const queryRestaurantId = Number(
+    new URLSearchParams(location.search).get("restaurant_id")
+  );
+  const activeRestaurant = cityByRestaurantId[queryRestaurantId] ?? "Aix-en-Provence";
+
+  const setActiveRestaurant = (city: string) => {
+    const restaurantId = restaurantIdByCity[city];
+    if (restaurantId) navigate(`/carte?restaurant_id=${restaurantId}`);
+  };
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
-      <AppBar position="sticky" color="inherit" elevation={0}>
-        <Toolbar sx={{ maxWidth: 1440, width: "100%", mx: "auto", px: { xs: 2, sm: 3 } }}>
-          <Typography
-            component={Link}
-            to="/carte"
-            variant="h6"
-            sx={{ flexGrow: 1, color: "primary.main", fontWeight: 900, textDecoration: "none" }}
-          >
-            Ytasty Crousty
-          </Typography>
-          <Button component={Link} to="/carte" color="inherit">
-            La carte
-          </Button>
-          <Tooltip title="Ouvrir le panier">
-            <IconButton component={Link} to="/panier" aria-label={`Panier, ${cartCount} article${cartCount === 1 ? "" : "s"}`} color="primary">
-              <Badge badgeContent={cartCount} color="secondary" max={99}>
-                <ShoppingBagOutlined />
-              </Badge>
-            </IconButton>
-          </Tooltip>
-        </Toolbar>
-      </AppBar>
+      <Header
+        activeRestaurant={activeRestaurant}
+        setActiveRestaurant={setActiveRestaurant}
+        cartCount={cartCount}
+      />
       <Outlet />
     </Box>
   );
-}
-
-function Dashboard() {
-  return <KitchenDashboard />;
 }
 
 function App() {
   return (
     <Routes>
       <Route element={<PublicLayout />}>
-        <Route path="/" element={<Navigate to="/carte" replace />} />
+        <Route path="/" element={<RestaurantList />} />
         <Route path="/carte" element={<ProductList />} />
         <Route path="/produit/:id" element={<ProductDetail />} />
         <Route path="/panier" element={<Cart />} />
@@ -76,33 +84,15 @@ function App() {
         <Route path="/suivi/:order_number" element={<OrderTracking />} />
       </Route>
 
-      <Route
-        path="/login"
-        element={<Login />}
-      />
+      <Route path="/login" element={<Login />} />
 
       <Route element={<ProtectedRoute />}>
-        <Route
-          path="/dashboard"
-          element={<Dashboard />}
-        />
+        <Route path="/dashboard" element={<KitchenDashboard />} />
       </Route>
 
-      <Route
-        element={
-          <ProtectedRoute
-            allowedRoles={["admin"]}
-          />
-        }
-      >
-        <Route
-          path="/admin"
-          element={<Navigate to="/admin/users" replace />}
-        />
-        <Route
-          path="/admin/users"
-          element={<CreateUserPage />}
-        />
+      <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+        <Route path="/admin" element={<Navigate to="/admin/users" replace />} />
+        <Route path="/admin/users" element={<CreateUserPage />} />
       </Route>
     </Routes>
   );

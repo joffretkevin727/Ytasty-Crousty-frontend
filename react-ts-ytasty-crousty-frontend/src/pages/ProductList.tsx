@@ -20,7 +20,7 @@ import {
     Typography,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { fetchProducts, imageUrl } from "../services/productService";
 import { addItem } from "../store/reducer/cart";
 import type { Category, Product } from "../type/product";
@@ -36,11 +36,11 @@ const LABELS: Record<Category, string> = {
     drink: "Boissons",
 };
 
-//remplacer par le resto selectionné
-const RESTAURANT_ID = 1;
-
 export default function ProductList() {
     const dispatch = useDispatch();
+    const [searchParams] = useSearchParams();
+    const requestedRestaurantId = Number(searchParams.get("restaurant_id"));
+    const restaurantId = requestedRestaurantId > 0 ? requestedRestaurantId : 1;
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -53,7 +53,7 @@ export default function ProductList() {
         let active = true;
         const timer = setTimeout(() => {
             fetchProducts({
-                restaurant_id: RESTAURANT_ID,
+                restaurant_id: restaurantId,
                 q: q || undefined,
                 category: category || undefined,
                 is_available: onlyAvailable ? true : undefined,
@@ -72,7 +72,7 @@ export default function ProductList() {
             active = false;
             clearTimeout(timer);
         };
-    }, [q, category, onlyAvailable]);
+    }, [q, category, onlyAvailable, restaurantId]);
 
     const handleAdd = (p: Product) => {
         dispatch(addItem(p));
