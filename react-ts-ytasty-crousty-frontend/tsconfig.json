@@ -1,3 +1,4 @@
+// Projet TypeScript composite: sépare les options navigateur et Node/Vite.
 {
   "files": [],
   "references": [

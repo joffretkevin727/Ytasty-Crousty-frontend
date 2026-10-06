@@ -1,3 +1,4 @@
+// Confirme la création d'une commande et propose un accès direct à son suivi.
 import { Button } from "@mui/material";
 import { Link, useParams } from "react-router-dom";
 

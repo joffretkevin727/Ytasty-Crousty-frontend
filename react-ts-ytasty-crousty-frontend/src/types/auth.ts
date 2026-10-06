@@ -1,3 +1,4 @@
+// Formes de données auth partagées entre login, JWT et Redux.
 export type UserRole = "staff" | "admin";
 
 export interface LoginRequest {

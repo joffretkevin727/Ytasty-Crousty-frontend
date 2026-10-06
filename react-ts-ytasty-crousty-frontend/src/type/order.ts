@@ -1,3 +1,4 @@
+// Contrats utilisés par le checkout et le suivi client.
 export type PickupMode = "onsite" | "takeaway";
 
 export type OrderStatus = "pending" | "validated" | "preparing" | "ready" | "collected" | "cancelled";

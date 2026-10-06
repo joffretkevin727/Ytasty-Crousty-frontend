@@ -1,3 +1,4 @@
+// Tableau cuisine filtré par restaurant, avec actions de statut et réception Socket.IO.
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import {
@@ -198,6 +199,7 @@ export default function KitchenDashboard() {
     return () => window.clearInterval(clock);
   }, []);
 
+  // Le socket staff rejoint son restaurant via le JWT; l'admin s'abonne au restaurant choisi.
   useEffect(() => {
     if (typeof restaurantId !== "number" || !accessToken) {
       return;

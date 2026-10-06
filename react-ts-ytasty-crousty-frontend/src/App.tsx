@@ -1,3 +1,4 @@
+// Assemble les routes et partage le Header, le restaurant sélectionné et le compteur panier.
 import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Box } from "@mui/material";
@@ -43,6 +44,7 @@ const restaurantIdByCity: Record<string, number> = {
 };
 
 function App() {
+  // Le restaurant est porté par l'URL pour que le catalogue et le Header restent synchronisés.
   const cartCount = useSelector((state: RootState) =>
     state.cart.items.reduce((count, item) => count + item.quantity, 0)
   );

@@ -1,3 +1,4 @@
+// Reducer panier: chaque ligne associe un produit à sa quantité.
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Product } from "../../type/product";
 

@@ -1,3 +1,4 @@
+// Crée un client Socket.IO authentifié pour recevoir les nouvelles commandes.
 import { io } from "socket.io-client";
 
 export function createKitchenSocket(token: string) {

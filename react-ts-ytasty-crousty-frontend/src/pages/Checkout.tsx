@@ -1,3 +1,4 @@
+// Valide les coordonnées client et transforme le panier en payload POST /orders.
 import { useState } from "react";
 import axios from "axios";
 import { Alert, Button, FormControlLabel, Radio, RadioGroup, TextField } from "@mui/material";
@@ -37,6 +38,7 @@ export default function Checkout() {
         setSending(true);
         setError("");
         try {
+            // Le restaurant est déduit du premier produit; l'API vérifie qu'il lui appartient.
             const order = await createOrder({
                 restaurant_id: items[0].product.restaurant_id,
                 items: items.map((i) => ({ product_id: i.product.id, quantity: i.quantity })),

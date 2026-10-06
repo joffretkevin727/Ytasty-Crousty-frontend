@@ -1,3 +1,4 @@
+// Appels d'authentification et de création de comptes via l'instance API partagée.
 import api from "./api";
 import type { LoginRequest, LoginResponse } from "../types/auth";
 

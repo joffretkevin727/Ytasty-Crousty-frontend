@@ -1,3 +1,4 @@
+// Catalogue filtrable par restaurant, texte, catégorie et disponibilité.
 import { useEffect, useState } from "react";
 import {
     Alert,
@@ -51,6 +52,7 @@ export default function ProductList() {
 
     useEffect(() => {
         let active = true;
+        // Le délai évite une requête API à chaque frappe dans la recherche.
         const timer = setTimeout(() => {
             fetchProducts({
                 restaurant_id: restaurantId,

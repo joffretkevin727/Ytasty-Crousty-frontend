@@ -1,3 +1,4 @@
+// Vérifications TypeScript des composants et pages exécutés dans le navigateur.
 {
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",

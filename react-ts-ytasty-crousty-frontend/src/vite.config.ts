@@ -1,3 +1,4 @@
+// Configuration Vite secondaire conservée dans src; la configuration active est à la racine du package.
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 

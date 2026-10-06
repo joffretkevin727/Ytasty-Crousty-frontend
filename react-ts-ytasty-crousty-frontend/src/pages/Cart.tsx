@@ -1,3 +1,4 @@
+// Affiche le panier Redux et applique les actions de quantité/suppression.
 import { Alert, Button, Container, Divider, IconButton, Paper, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";

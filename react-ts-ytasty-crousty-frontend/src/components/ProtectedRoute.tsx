@@ -1,3 +1,4 @@
+// Bloque les routes privées selon l'état d'authentification et les rôles autorisés.
 import { Navigate, Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
 
