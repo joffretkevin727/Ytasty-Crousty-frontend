@@ -7,6 +7,6 @@ export const fetchProducts = async (filters: ProductFilters): Promise<Product[]>
 };
 
 export const fetchProduct = async (id: number): Promise<Product> => {
-    const { data } = await api.get<Product>(`products/${id}`);
+    const { data } = await api.get<Product>(`/products/${id}`);
     return data;
 }
