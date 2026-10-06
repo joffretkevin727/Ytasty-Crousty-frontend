@@ -1,12 +1,21 @@
 import { useEffect, useState } from "react";
-import { Alert, Button, Card, Chip, FormControlLabel, MenuItem, Skeleton, Switch, TextField } from "@mui/material";
+import { Alert, Button, Card, Chip, FormControlLabel, MenuItem, Skeleton, Snackbar, Switch, TextField } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import { fetchProducts } from "../services/productService";
+import { fetchProducts, imageUrl } from "../services/productService";
 import { addItem } from "../store/reducer/cart";
 import type { Category, Product } from "../type/product";
 
-const CATEGORIES: Category[] = ["burgers", "menus", "accompagnements", "boissons", "desserts"];
+const CATEGORIES: Category[] = ["chicken", "side", "vegetarian", "menu", "dessert", "drink"];
+
+const LABELS: Record<Category, string> = {
+    chicken: "Poulet",
+    side: "Accompagnements",
+    vegetarian: "Végétarien",
+    menu: "Menus",
+    dessert: "Desserts",
+    drink: "Boissons",
+};
 
 //remplacer par le resto selectionné
 const RESTAURANT_ID = 1;
@@ -19,6 +28,7 @@ export default function ProductList() {
     const [q, setQ] = useState("");
     const [category, setCategory] = useState<Category | "">("");
     const [onlyAvailable, setOnlyAvailable] = useState(false);
+    const [added, setAdded] = useState(false);
 
     useEffect(() => {
         setLoading(true);
@@ -38,6 +48,11 @@ export default function ProductList() {
         return () => clearTimeout(timer);
     }, [q, category, onlyAvailable]);
 
+    const handleAdd = (p: Product) => {
+        dispatch(addItem(p));
+        setAdded(true);
+    };
+
     return (
         <div className="page">
             <div className="filters">
@@ -56,13 +71,14 @@ export default function ProductList() {
                 >
                     <MenuItem value="">Toutes</MenuItem>
                     {CATEGORIES.map((c) => (
-                        <MenuItem key={c} value={c}>{c}</MenuItem>
+                        <MenuItem key={c} value={c}>{LABELS[c]}</MenuItem>
                     ))}
                 </TextField>
                 <FormControlLabel
                     control={<Switch checked={onlyAvailable} onChange={(e) => setOnlyAvailable(e.target.checked)} />}
                     label="Disponibles"
                 />
+                <Button component={Link} to="/panier" variant="outlined">Voir le panier</Button>
             </div>
 
             {error && <Alert severity="error">{error}</Alert>}
@@ -77,9 +93,9 @@ export default function ProductList() {
                 <div className="grid">
                     {products.map((p) => (
                         <Card key={p.id} className={`product-card ${p.is_available ? "" : "unavailable"}`}>
-                            {p.image_url && <img src={p.image_url} alt={p.name} />}
+                            {p.image && <img src={imageUrl(p.image)} alt={p.name} />}
                             <div className="content">
-                                <Chip label={p.category} size="small" />
+                                <Chip label={LABELS[p.category]} size="small" />
                                 <h3>
                                     <Link to={`/produit/${p.id}`}>{p.name}</Link>
                                 </h3>
@@ -89,7 +105,7 @@ export default function ProductList() {
                                     variant="contained"
                                     fullWidth
                                     disabled={!p.is_available}
-                                    onClick={() => dispatch(addItem(p))}
+                                    onClick={() => handleAdd(p)}
                                 >
                                     {p.is_available ? "Ajouter" : "Indisponible"}
                                 </Button>
@@ -99,6 +115,13 @@ export default function ProductList() {
                     {!products.length && !error && <p>Aucun produit trouvé.</p>}
                 </div>
             )}
+
+            <Snackbar
+                open={added}
+                autoHideDuration={2000}
+                onClose={() => setAdded(false)}
+                message="Ajouté au panier"
+            />
         </div>
     );
 }

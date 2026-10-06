@@ -1,12 +1,13 @@
-export type Category = "burgers" | "menus" | "accompagnements" | "boissons" | "desserts";
+export type Category = "chicken" | "side" | "vegetarian" | "menu" | "dessert" | "drink";
 
 export interface Product {
     id: number;
     name: string;
+    description: string;
+    image?: string;
     price: number;
     category: Category;
     ingredients: string[];
-    image_url?: string;
     is_available: boolean;
     restaurant_id: number;
 }
