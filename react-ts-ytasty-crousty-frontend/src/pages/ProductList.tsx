@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-    Alert, Box, Button, Card, CardContent, CardMedia, Chip, FormControlLabel, MenuItem, Skeleton, Stack, Switch, TextField, Typography } from "@mui/material";
+import { Alert, Button, Card, Chip, FormControlLabel, MenuItem, Skeleton, Switch, TextField } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { fetchProducts } from "../services/productService";
@@ -40,20 +39,20 @@ export default function ProductList() {
     }, [q, category, onlyAvailable]);
 
     return (
-        <Box sx={{ p: 3 }}>
-            <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ mb: 3 }}>
+        <div className="page">
+            <div className="filters">
                 <TextField
+                    className="search"
                     label="Rechercher un produit"
                     value={q}
                     onChange={(e) => setQ(e.target.value)}
-                    fullWidth
                 />
                 <TextField
                     select
                     label="Catégorie"
                     value={category}
                     onChange={(e) => setCategory(e.target.value as Category | "")}
-                    sx={{ minWidth: 200 }}
+                    style={{ minWidth: 200 }}
                 >
                     <MenuItem value="">Toutes</MenuItem>
                     {CATEGORIES.map((c) => (
@@ -64,31 +63,28 @@ export default function ProductList() {
                     control={<Switch checked={onlyAvailable} onChange={(e) => setOnlyAvailable(e.target.checked)} />}
                     label="Disponibles"
                 />
-            </Stack>
+            </div>
 
-            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+            {error && <Alert severity="error">{error}</Alert>}
 
             {loading ? (
-                <Stack direction="row" sx={{ flexWrap: "wrap", gap: 2 }}>                    {[1, 2, 3, 4].map((n) => (
+                <div className="grid">
+                    {[1, 2, 3, 4].map((n) => (
                         <Skeleton key={n} variant="rounded" width={280} height={340} />
                     ))}
-                </Stack>
+                </div>
             ) : (
-                <Stack direction="row" sx={{ flexWrap: "wrap", gap: 2 }}>                    {products.map((p) => (
-                        <Card key={p.id} sx={{ width: 280, opacity: p.is_available ? 1 : 0.5 }}>
-                            {p.image_url && <CardMedia component="img" height="160" image={p.image_url} alt={p.name} />}
-                            <CardContent>
-                                <Chip label={p.category} size="small" sx={{ mb: 1 }} />
-                                <Typography variant="h6" component={Link} to={`/produit/${p.id}`}
-                                            sx={{ display: "block", textDecoration: "none", color: "inherit" }}>
-                                    {p.name}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    {p.ingredients.join(", ")}
-                                </Typography>
-                                <Typography variant="subtitle1" sx={{ my: 1 }}>
-                                    {p.price.toFixed(2)} €
-                                </Typography>
+                <div className="grid">
+                    {products.map((p) => (
+                        <Card key={p.id} className={`product-card ${p.is_available ? "" : "unavailable"}`}>
+                            {p.image_url && <img src={p.image_url} alt={p.name} />}
+                            <div className="content">
+                                <Chip label={p.category} size="small" />
+                                <h3>
+                                    <Link to={`/produit/${p.id}`}>{p.name}</Link>
+                                </h3>
+                                <p>{p.ingredients.join(", ")}</p>
+                                <p><strong>{p.price.toFixed(2)} €</strong></p>
                                 <Button
                                     variant="contained"
                                     fullWidth
@@ -97,12 +93,12 @@ export default function ProductList() {
                                 >
                                     {p.is_available ? "Ajouter" : "Indisponible"}
                                 </Button>
-                            </CardContent>
+                            </div>
                         </Card>
                     ))}
-                    {!products.length && !error && <Typography>Aucun produit trouvé.</Typography>}
-                </Stack>
+                    {!products.length && !error && <p>Aucun produit trouvé.</p>}
+                </div>
             )}
-        </Box>
+        </div>
     );
 }
