@@ -1,12 +1,8 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { Link as RouterLink } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { AppBar, Box, Button, Toolbar, Typography } from "@mui/material";
+import { useSelector } from "react-redux";
 
 import type { RootState } from "../store/store";
-import type { AppDispatch } from "../store/store";
 import type { UserRole } from "../types/auth";
-import { logout } from "../store/reducers/authSlice";
 
 interface ProtectedRouteProps {
   allowedRoles?: UserRole[];
@@ -15,7 +11,6 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({
   allowedRoles,
 }: ProtectedRouteProps) {
-  const dispatch = useDispatch<AppDispatch>();
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
   );
@@ -33,34 +28,5 @@ export default function ProtectedRoute({
     return <Navigate to="/" replace />;
   }
 
-  return (
-    <>
-      <AppBar position="static" color="inherit" elevation={0}>
-        <Toolbar sx={{ justifyContent: "space-between", borderBottom: 1, borderColor: "divider" }}>
-          <Typography variant="h6" sx={{ fontWeight: 800, color: "primary.main" }}>
-            Ytasty Crousty <Box component="span" sx={{ color: "text.secondary", fontWeight: 500 }}>| Espace pro</Box>
-          </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Button component={RouterLink} to="/dashboard" color="inherit">
-              Cuisine
-            </Button>
-            {user?.role === "admin" && (
-              <Button component={RouterLink} to="/admin/users" color="inherit">
-                Utilisateurs
-              </Button>
-            )}
-            <Button
-              color="inherit"
-              onClick={() => {
-                dispatch(logout());
-              }}
-            >
-              Se déconnecter
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
-      <Outlet />
-    </>
-  );
+  return <Outlet />;
 }

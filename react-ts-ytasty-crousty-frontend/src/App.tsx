@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Box } from "@mui/material";
 
@@ -42,7 +42,7 @@ const restaurantIdByCity: Record<string, number> = {
   Montpellier: 10,
 };
 
-function PublicLayout() {
+function App() {
   const cartCount = useSelector((state: RootState) =>
     state.cart.items.reduce((count, item) => count + item.quantity, 0)
   );
@@ -65,15 +65,7 @@ function PublicLayout() {
         setActiveRestaurant={setActiveRestaurant}
         cartCount={cartCount}
       />
-      <Outlet />
-    </Box>
-  );
-}
-
-function App() {
-  return (
-    <Routes>
-      <Route element={<PublicLayout />}>
+      <Routes>
         <Route path="/" element={<RestaurantList />} />
         <Route path="/carte" element={<ProductList />} />
         <Route path="/produit/:id" element={<ProductDetail />} />
@@ -82,7 +74,6 @@ function App() {
         <Route path="/confirmation/:order_number" element={<OrderConfirmation />} />
         <Route path="/suivi" element={<OrderTracking />} />
         <Route path="/suivi/:order_number" element={<OrderTracking />} />
-      </Route>
 
       <Route path="/login" element={<Login />} />
 
@@ -94,7 +85,8 @@ function App() {
         <Route path="/admin" element={<Navigate to="/admin/users" replace />} />
         <Route path="/admin/users" element={<CreateUserPage />} />
       </Route>
-    </Routes>
+      </Routes>
+    </Box>
   );
 }
 
