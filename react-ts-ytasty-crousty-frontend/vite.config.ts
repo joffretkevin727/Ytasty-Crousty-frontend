@@ -1,4 +1,5 @@
-﻿import { defineConfig } from "vite";
+﻿// Vite active: proxy REST et Socket.IO vers FastAPI pendant le développement.
+import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({

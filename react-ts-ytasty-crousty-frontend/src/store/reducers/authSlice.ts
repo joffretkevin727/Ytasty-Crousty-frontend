@@ -1,3 +1,4 @@
+// Gère la session auth et la persistance du JWT et du profil utilisateur.
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { AuthUser } from "../../types/auth";
 
@@ -8,6 +9,7 @@ interface AuthState {
 }
 
 const getInitialState = (): AuthState => {
+  // Au redémarrage, restaure uniquement une session dont le profil est exploitable.
   const accessToken = localStorage.getItem("access_token");
 
   try {

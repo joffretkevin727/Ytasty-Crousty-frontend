@@ -1,3 +1,4 @@
+// Instance Axios commune: base API configurable et JWT ajouté à chaque requête.
 import axios from "axios";
 
 const api = axios.create({
@@ -9,6 +10,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
+    // Le token reste centralisé dans le slice auth et son stockage local.
     const token = localStorage.getItem("access_token");
 
     if (token) {

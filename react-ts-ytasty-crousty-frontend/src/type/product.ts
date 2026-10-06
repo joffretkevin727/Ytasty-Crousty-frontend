@@ -1,3 +1,4 @@
+// Modèle produit et filtres transmis aux endpoints catalogue.
 export type Category = "chicken" | "side" | "vegetarian" | "menu" | "dessert" | "drink";
 
 export interface Product {

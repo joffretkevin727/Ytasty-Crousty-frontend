@@ -1,3 +1,4 @@
+// Authentifie l'utilisateur, extrait rôle/restaurant du JWT et initialise Redux.
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";

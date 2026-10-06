@@ -1,3 +1,4 @@
+// Assemble auth et panier; le panier est restauré puis sauvegardé dans localStorage.
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./reducers/authSlice";
 import cartReducer, { type CartItem } from "./reducer/cart";
@@ -11,6 +12,7 @@ const getPersistedCart = (): PersistedCart | undefined => {
   if (!saved) return undefined;
 
   try {
+    // N'accepte qu'un objet contenant un tableau items avant de l'utiliser comme état.
     const parsed: unknown = JSON.parse(saved);
     if (
       typeof parsed === "object" &&

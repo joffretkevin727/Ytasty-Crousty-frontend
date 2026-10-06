@@ -1,3 +1,4 @@
+// Centralise les requêtes REST utilisées par le checkout, le suivi et la cuisine.
 import api from "./api"
 import type { CreateOrderPayload, Order } from "../type/order"
 import type {

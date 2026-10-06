@@ -1,3 +1,4 @@
+// Recherche une commande par numéro et traduit son statut en étapes de suivi.
 import { useEffect, useState } from "react";
 import { Alert, Button, Skeleton, Step, StepLabel, Stepper, TextField } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
@@ -5,6 +6,7 @@ import { fetchOrder } from "../services/orderService";
 import { fetchProduct } from "../services/productService";
 import type { Order, OrderStatus } from "../type/order";
 
+// Les états terminaux annulé/récupéré sont traités séparément du stepper.
 const STEPS: { status: OrderStatus; label: string }[] = [
     { status: "pending", label: "En attente" },
     { status: "validated", label: "Validée" },

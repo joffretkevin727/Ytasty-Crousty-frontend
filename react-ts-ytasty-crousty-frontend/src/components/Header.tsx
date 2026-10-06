@@ -1,3 +1,4 @@
+// Barre globale: navigation, restaurant actif, compteur panier et actions de session.
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {

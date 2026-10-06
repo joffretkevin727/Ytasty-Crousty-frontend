@@ -1,3 +1,4 @@
+// Charge les restaurants depuis l'API et dirige le client vers leur catalogue.
 import { useEffect, useState } from "react";
 import {
   Alert,

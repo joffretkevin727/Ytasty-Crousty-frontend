@@ -1,3 +1,4 @@
+// Charge un produit par son identifiant et permet de l'ajouter au panier.
 import { useEffect, useState } from "react";
 import { Alert, Box, Button, Chip, Container, Paper, Skeleton, Stack, Typography } from "@mui/material";
 import { useDispatch } from "react-redux";

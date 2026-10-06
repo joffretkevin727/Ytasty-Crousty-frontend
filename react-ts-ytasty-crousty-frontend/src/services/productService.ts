@@ -1,3 +1,4 @@
+// Requêtes catalogue/détail produit et construction des URLs d'images API.
 import api from "./api"
 import type { Product, ProductFilters } from "../type/product"
 

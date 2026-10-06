@@ -1,3 +1,4 @@
+// Contrats API des commandes, produits et restaurants employés par le module cuisine.
 export type OrderStatus =
   | "pending"
   | "validated"

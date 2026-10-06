@@ -1,3 +1,4 @@
+// Formulaire admin: valide les identifiants puis rattache chaque staff à un restaurant.
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
@@ -56,6 +57,7 @@ export const CreateUserPage: React.FC = () => {
   // Soumet les informations du nouvel utilisateur au backend
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Ces contraintes doivent rester identiques aux schémas Pydantic de l'API.
     if (!/^[A-Za-z0-9]{8,12}$/.test(username)) {
       setFeedback({ type: 'error', message: "L'identifiant doit contenir 8 à 12 caractères alphanumériques." });
       return;

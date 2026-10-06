@@ -1,3 +1,4 @@
+// Table alternative des routes client; App.tsx déclare actuellement les routes montées.
 import type { RouteObject } from "react-router-dom";
 import ProductList from "./pages/ProductList";
 import ProductDetail from "./pages/ProductDetail";
