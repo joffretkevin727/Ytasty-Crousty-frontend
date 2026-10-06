@@ -1,4 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppBar, Box, Button, Toolbar, Typography } from "@mui/material";
 
@@ -39,14 +40,24 @@ export default function ProtectedRoute({
           <Typography variant="h6" sx={{ fontWeight: 800, color: "primary.main" }}>
             Ytasty Crousty <Box component="span" sx={{ color: "text.secondary", fontWeight: 500 }}>| Espace pro</Box>
           </Typography>
-          <Button
-            color="inherit"
-            onClick={() => {
-              dispatch(logout());
-            }}
-          >
-            Se déconnecter
-          </Button>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Button component={RouterLink} to="/dashboard" color="inherit">
+              Cuisine
+            </Button>
+            {user?.role === "admin" && (
+              <Button component={RouterLink} to="/admin/users" color="inherit">
+                Utilisateurs
+              </Button>
+            )}
+            <Button
+              color="inherit"
+              onClick={() => {
+                dispatch(logout());
+              }}
+            >
+              Se déconnecter
+            </Button>
+          </Box>
         </Toolbar>
       </AppBar>
       <Outlet />

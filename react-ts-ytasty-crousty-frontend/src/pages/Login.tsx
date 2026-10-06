@@ -71,6 +71,7 @@ export default function Login() {
       const user = {
         username: decoded.sub,
         role: decoded.role,
+        restaurantId: decoded.restaurant_id,
       };
 
       // Sauvegarde dans Redux + localStorage

@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/Login";
 import { CreateUserPage } from "./pages/CreateUserPage";
+import KitchenDashboard from "./pages/KitchenDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function Home() {
@@ -9,7 +10,7 @@ function Home() {
 }
 
 function Dashboard() {
-  return <h1>Dashboard professionnel</h1>;
+  return <KitchenDashboard />;
 }
 
 function App() {
