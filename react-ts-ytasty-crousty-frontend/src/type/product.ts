@@ -18,3 +18,14 @@ export interface ProductFilters {
     q?: string;
     is_available?: boolean;
 }
+
+export interface ProductPayload {
+    name: string;
+    description: string;
+    category: Category;
+    price: number;
+    ingredients: string[];
+    image?: string;
+    restaurant_id: number;
+    is_available?: boolean;
+}
