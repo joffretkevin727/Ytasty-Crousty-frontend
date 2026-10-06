@@ -43,7 +43,7 @@ export default function Cart() {
             <div className="cart-actions">
                 <Button color="error" onClick={() => dispatch(clearCart())}>Vider le panier</Button>
                 {/* branché au Module C plus tard */}
-                <Button variant="contained" disabled>Commander</Button>
+                <Button component={Link} to="/commande" variant="contained">Commander</Button>
             </div>
         </div>
     );
