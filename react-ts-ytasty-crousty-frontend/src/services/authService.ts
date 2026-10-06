@@ -13,9 +13,12 @@ export const login = async (
 };
 
 export interface CreateUserRequest {
+  first_name: string;
+  last_name: string;
   username: string;
   password: string;
   role: "staff" | "admin";
+  restaurant_id: number | null;
 }
 
 export const createUserRequest = async (
