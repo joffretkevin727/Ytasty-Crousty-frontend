@@ -1,10 +1,19 @@
 import { useEffect, useState } from "react";
-import { Alert, Button, Chip, Skeleton } from "@mui/material";
+import { Alert, Box, Button, Chip, Container, Paper, Skeleton, Stack, Typography } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { Link, useParams } from "react-router-dom";
-import { fetchProduct } from "../services/productService";
+import { fetchProduct, imageUrl } from "../services/productService";
 import { addItem } from "../store/reducer/cart";
-import type { Product } from "../type/product";
+import type { Category, Product } from "../type/product";
+
+const CATEGORY_LABELS: Record<Category, string> = {
+    chicken: "Poulet",
+    side: "Accompagnements",
+    vegetarian: "Végétarien",
+    menu: "Menus",
+    dessert: "Desserts",
+    drink: "Boissons",
+};
 
 export default function ProductDetail() {
     const { id } = useParams();
@@ -14,25 +23,32 @@ export default function ProductDetail() {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        setLoading(true);
         fetchProduct(Number(id))
             .then(setProduct)
             .catch(() => setError("Produit introuvable."))
             .finally(() => setLoading(false));
     }, [id]);
 
-    if (loading) return <div className="page"><Skeleton variant="rounded" height={400} /></div>;
-    if (error || !product) return <div className="page"><Alert severity="error">{error}</Alert></div>;
+    if (loading) return <Container component="main" maxWidth="lg" sx={{ py: 5 }}><Skeleton variant="rounded" height={440} /></Container>;
+    if (error || !product) return <Container component="main" maxWidth="lg" sx={{ py: 5 }}><Alert severity="error">{error}</Alert></Container>;
 
     return (
-        <div className="page">
-            <Link to="/carte">← Retour à la carte</Link>
-            {product.image_url && <img className="detail-image" src={product.image_url} alt={product.name} />}
-            <div className="detail-info">
-                <Chip label={product.category} />
-                <h1>{product.name}</h1>
-                <p>Ingrédients : {product.ingredients.join(", ")}</p>
-                <h2>{product.price.toFixed(2)} €</h2>
+        <Container component="main" maxWidth="lg" sx={{ py: { xs: 3, md: 5 } }}>
+            <Button component={Link} to="/carte" color="inherit" sx={{ mb: 2 }}>← Retour à la carte</Button>
+            <Paper variant="outlined" sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1.1fr 1fr" }, overflow: "hidden", borderColor: "divider" }}>
+                {product.image ? (
+                    <Box component="img" src={imageUrl(product.image)} alt={product.name} sx={{ width: "100%", height: { xs: 260, md: "100%" }, minHeight: { md: 440 }, objectFit: "cover" }} />
+                ) : (
+                    <Box sx={{ minHeight: 260, bgcolor: "action.hover" }} />
+                )}
+                <Stack spacing={2} sx={{ p: { xs: 2.5, md: 4 }, alignItems: "flex-start" }}>
+                <Chip label={CATEGORY_LABELS[product.category]} color="secondary" variant="outlined" />
+                <Typography component="h1" variant="h4">{product.name}</Typography>
+                <Typography color="text.secondary">{product.description}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                    Ingrédients : {product.ingredients.join(", ")}
+                </Typography>
+                <Typography variant="h5" color="primary.dark">{product.price.toFixed(2)} €</Typography>
                 <Chip
                     label={product.is_available ? "Disponible" : "Indisponible"}
                     color={product.is_available ? "success" : "error"}
@@ -40,12 +56,14 @@ export default function ProductDetail() {
                 <Button
                     variant="contained"
                     size="large"
+                    fullWidth
                     disabled={!product.is_available}
                     onClick={() => dispatch(addItem(product))}
                 >
                     {product.is_available ? "Ajouter au panier" : "Indisponible"}
                 </Button>
-            </div>
-        </div>
+                </Stack>
+            </Paper>
+        </Container>
     );
 }
