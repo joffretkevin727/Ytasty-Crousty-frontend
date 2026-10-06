@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import {
   Alert,
@@ -20,6 +20,8 @@ import {
 } from "@mui/material";
 import CancelOutlined from "@mui/icons-material/CancelOutlined";
 import Refresh from "@mui/icons-material/Refresh";
+import VolumeOff from "@mui/icons-material/VolumeOff";
+import VolumeUp from "@mui/icons-material/VolumeUp";
 import { useSelector } from "react-redux";
 
 import {
@@ -30,6 +32,7 @@ import {
   getRestaurants,
   updateOrderStatus,
 } from "../services/orderService";
+import { createKitchenSocket } from "../services/orderSocket";
 import type { RootState } from "../store/store";
 import type {
   KitchenOrder,
@@ -39,6 +42,7 @@ import type {
 } from "../types/orders";
 
 type StatusFilter = "all" | "pending" | "preparing" | "ready";
+type SocketStatus = "connecting" | "connected" | "disconnected";
 
 const columns: { id: Exclude<StatusFilter, "all">; title: string }[] = [
   { id: "pending", title: "À traiter" },
@@ -91,7 +95,7 @@ function getStatusLabel(status: OrderStatus): string {
 }
 
 export default function KitchenDashboard() {
-  const user = useSelector((state: RootState) => state.auth.user);
+  const { user, accessToken } = useSelector((state: RootState) => state.auth);
   const [restaurants, setRestaurants] = useState<RestaurantSummary[]>([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<number | "">("");
   const [linkedRestaurantName, setLinkedRestaurantName] = useState("");
@@ -103,8 +107,14 @@ export default function KitchenDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [busyOrder, setBusyOrder] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [toast, setToast] = useState<{ severity: "success" | "error"; message: string } | null>(null);
+  const [toast, setToast] = useState<{ severity: "success" | "error" | "info"; message: string } | null>(null);
   const [now, setNow] = useState(0);
+  const [socketStatus, setSocketStatus] = useState<SocketStatus>("connecting");
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [newOrderNumber, setNewOrderNumber] = useState<string | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const soundEnabledRef = useRef(false);
+  const highlightTimeoutRef = useRef<number | null>(null);
 
   const isAdmin = user?.role === "admin";
   const restaurantId = isAdmin
@@ -177,16 +187,85 @@ export default function KitchenDashboard() {
     };
 
     void load(true);
-    const interval = window.setInterval(() => {
-      setNow(Date.now());
-      void load(false);
-    }, 30_000);
 
     return () => {
       active = false;
-      window.clearInterval(interval);
     };
   }, [restaurantId]);
+
+  useEffect(() => {
+    const clock = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(clock);
+  }, []);
+
+  useEffect(() => {
+    if (typeof restaurantId !== "number" || !accessToken) {
+      return;
+    }
+
+    const socket = createKitchenSocket(accessToken);
+
+    socket.on("connect", () => {
+      setSocketStatus("connected");
+      if (isAdmin) {
+        socket.emit(
+          "subscribe_restaurant",
+          { restaurant_id: restaurantId },
+          (result: { ok: boolean; detail?: string }) => {
+            if (!result.ok) {
+              setToast({ severity: "error", message: result.detail ?? "Abonnement au restaurant refusé." });
+            }
+          }
+        );
+      }
+    });
+
+    socket.on("disconnect", () => setSocketStatus("disconnected"));
+    socket.on("connect_error", () => setSocketStatus("disconnected"));
+    socket.on("new_order", (order: KitchenOrder) => {
+      if (order.restaurant_id !== restaurantId) return;
+
+      setOrders((current) => current.some((item) => item.order_number === order.order_number)
+        ? current
+        : [...current, order]);
+      setNow(Date.now());
+      setNewOrderNumber(order.order_number);
+      setToast({ severity: "info", message: `Nouvelle commande reçue : ${order.order_number}.` });
+
+      if (highlightTimeoutRef.current !== null) {
+        window.clearTimeout(highlightTimeoutRef.current);
+      }
+      highlightTimeoutRef.current = window.setTimeout(() => setNewOrderNumber(null), 8_000);
+
+      const audioContext = audioContextRef.current;
+      if (soundEnabledRef.current && audioContext?.state === "running") {
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        oscillator.type = "sine";
+        oscillator.frequency.value = 880;
+        gain.gain.setValueAtTime(0.12, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.35);
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.35);
+      }
+    });
+
+    socket.connect();
+    return () => {
+      socket.disconnect();
+    };
+  }, [accessToken, isAdmin, restaurantId]);
+
+  useEffect(() => () => {
+    if (highlightTimeoutRef.current !== null) {
+      window.clearTimeout(highlightTimeoutRef.current);
+    }
+    if (audioContextRef.current) {
+      void audioContextRef.current.close();
+    }
+  }, []);
 
   const activeOrders = orders
     .filter((order) => ["pending", "validated", "preparing", "ready"].includes(order.status))
@@ -247,7 +326,32 @@ export default function KitchenDashboard() {
     }
   };
 
+  const handleToggleSound = async () => {
+    if (soundEnabled) {
+      soundEnabledRef.current = false;
+      setSoundEnabled(false);
+      return;
+    }
+
+    try {
+      const audioContext = audioContextRef.current ?? new AudioContext();
+      audioContextRef.current = audioContext;
+      await audioContext.resume();
+      soundEnabledRef.current = true;
+      setSoundEnabled(true);
+    } catch {
+      setToast({ severity: "error", message: "Le navigateur ne permet pas d’activer le son." });
+    }
+  };
+
   const hasRestaurant = typeof restaurantId === "number";
+  const socketLabel = !hasRestaurant
+    ? "Sélectionnez un restaurant"
+    : socketStatus === "connected"
+      ? "Temps réel actif"
+      : socketStatus === "connecting"
+      ? "Connexion live…"
+      : "Temps réel indisponible";
 
   return (
     <Box component="main" sx={{ px: { xs: 2, md: 4 }, py: { xs: 3, md: 4 }, maxWidth: 1600, mx: "auto" }}>
@@ -264,6 +368,21 @@ export default function KitchenDashboard() {
           </Typography>
         </Box>
         <Stack spacing={1.5} sx={{ flexDirection: "row", alignItems: "center" }}>
+          <Chip
+            size="small"
+            label={socketLabel}
+            color={socketStatus === "connected" ? "success" : "default"}
+            variant="outlined"
+          />
+          <Tooltip title={soundEnabled ? "Désactiver le son" : "Activer le son des commandes"}>
+            <IconButton
+              aria-label={soundEnabled ? "Désactiver le son" : "Activer le son des commandes"}
+              color={soundEnabled ? "primary" : "default"}
+              onClick={() => void handleToggleSound()}
+            >
+              {soundEnabled ? <VolumeUp /> : <VolumeOff />}
+            </IconButton>
+          </Tooltip>
           {isAdmin && (
             <FormControl size="small" sx={{ minWidth: { xs: 180, sm: 240 } }}>
               <InputLabel id="restaurant-select-label">Restaurant</InputLabel>
@@ -366,7 +485,12 @@ export default function KitchenDashboard() {
                           key={order.order_number}
                           component="article"
                           variant="outlined"
-                          sx={{ p: 2, borderLeft: overdue ? 4 : 1, borderLeftColor: overdue ? "warning.main" : "divider" }}
+                            sx={{
+                              p: 2,
+                              borderLeft: overdue || newOrderNumber === order.order_number ? 4 : 1,
+                              borderLeftColor: overdue ? "warning.main" : newOrderNumber === order.order_number ? "success.main" : "divider",
+                              bgcolor: newOrderNumber === order.order_number ? "success.50" : "background.paper",
+                            }}
                         >
                           <Stack spacing={1} sx={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
                             <Box>
@@ -375,7 +499,10 @@ export default function KitchenDashboard() {
                                 Reçue à {new Date(order.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                               </Typography>
                             </Box>
-                            <Chip size="small" label={`${age} min`} color={overdue ? "warning" : "default"} />
+                            <Stack spacing={0.5} sx={{ alignItems: "flex-end" }}>
+                              {newOrderNumber === order.order_number && <Chip size="small" color="success" label="Nouvelle" />}
+                              <Chip size="small" label={`${age} min`} color={overdue ? "warning" : "default"} />
+                            </Stack>
                           </Stack>
 
                           {overdue && <Typography variant="caption" color="warning.dark" sx={{ display: "block", mt: 0.5, fontWeight: 700 }}>En attente depuis trop longtemps</Typography>}
